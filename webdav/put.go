@@ -3,7 +3,7 @@ package webdav
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
-	"github.com/whitedav/lib/whitedav/storage"
+	"github.com/sanato/sanato-lib/storage"
 	"net/http"
 )
 

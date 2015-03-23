@@ -3,9 +3,9 @@ package webdav
 import (
 	"errors"
 	"github.com/julienschmidt/httprouter"
-	"github.com/whitedav/lib/whitedav/auth"
-	"github.com/whitedav/lib/whitedav/config"
-	"github.com/whitedav/lib/whitedav/storage"
+	"github.com/sanato/sanato-lib/auth"
+	"github.com/sanato/sanato-lib/config"
+	"github.com/sanato/sanato-lib/storage"
 	"net/http"
 )
 
