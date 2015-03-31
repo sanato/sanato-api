@@ -6,6 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
 	"net/http"
+	"path/filepath"
 	"strconv"
 )
 
@@ -16,7 +17,7 @@ func (api *API) stat(w http.ResponseWriter, r *http.Request, p httprouter.Params
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	resource := p.ByName("path")
+	resource := filepath.Clean(p.ByName("path"))
 	if resource == "" {
 		resource = "/"
 	}

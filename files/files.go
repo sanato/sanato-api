@@ -28,7 +28,7 @@ func (api *API) Start() {
 	api.router.Handle("POST", "/files_delete/*path", api.delete)
 	api.router.Handle("POST", "/files_mkcol/*path", api.mkcol)
 	api.router.Handle("GET", "/files_stat/*path", api.stat)
-	api.router.Handle("POST", "/files_move", api.move)
+	api.router.Handle("POST", "/files_rename", api.move)
 }
 
 func (api *API) basicAuth(r *http.Request) (*auth.AuthResource, error) {
