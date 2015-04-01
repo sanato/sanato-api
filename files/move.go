@@ -1,6 +1,7 @@
 package files
 
 import (
+	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
@@ -28,6 +29,24 @@ func (api *API) move(w http.ResponseWriter, r *http.Request, p httprouter.Params
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	meta, err := api.storageProvider.Stat(to, false)
+	if err != nil {
+		if storage.IsNotExistError(err) {
+			logrus.Error(err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+		logrus.Error(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	metaJSON, err := json.Marshal(meta)
+	if err != nil {
+		logrus.Error(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
+	w.Write(metaJSON)
 	return
 }
