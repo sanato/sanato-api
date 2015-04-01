@@ -1,6 +1,7 @@
 package files
 
 import (
+	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
@@ -36,10 +37,24 @@ func (api *API) put(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 				return
 			}
 			meta, err = api.storageProvider.Stat(resource, false)
-			if err == nil {
-				w.Header().Set("ETag", meta.ETag)
+			if err != nil {
+				if storage.IsNotExistError(err) {
+					logrus.Error(err)
+					http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+					return
+				}
+				logrus.Error(err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			metaJSON, err := json.Marshal(meta)
+			if err != nil {
+				logrus.Error(err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
 			}
 			w.WriteHeader(http.StatusCreated)
+			w.Write(metaJSON)
 			return
 		} else {
 			logrus.Error(err)
@@ -59,9 +74,23 @@ func (api *API) put(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 		return
 	}
 	meta, err = api.storageProvider.Stat(resource, false)
-	if err == nil {
-		w.Header().Set("ETag", meta.ETag)
+	if err != nil {
+		if storage.IsNotExistError(err) {
+			logrus.Error(err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+		logrus.Error(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
-	w.WriteHeader(http.StatusNoContent)
+	metaJSON, err := json.Marshal(meta)
+	if err != nil {
+		logrus.Error(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	w.Write(metaJSON)
 	return
 }
