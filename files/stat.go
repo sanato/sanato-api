@@ -2,6 +2,7 @@ package files
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
@@ -11,9 +12,9 @@ import (
 )
 
 func (api *API) stat(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	_, err := api.tokenAuth(r, true)
+	authRes, err := api.tokenAuth(r, true)
 	if err != nil {
-		logrus.Error(err)
+		go logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
@@ -21,6 +22,7 @@ func (api *API) stat(w http.ResponseWriter, r *http.Request, p httprouter.Params
 	if resource == "" {
 		resource = "/"
 	}
+	logrus.Info(fmt.Sprintf("api:files user:%s op:stat path:%s", authRes.Username, resource))
 	var children bool
 	queryChildren := r.URL.Query().Get("children")
 	if queryChildren != "" {
@@ -30,24 +32,24 @@ func (api *API) stat(w http.ResponseWriter, r *http.Request, p httprouter.Params
 		}
 	}
 	if err != nil {
-		logrus.Warn(err)
+		logrus.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	meta, err := api.storageProvider.Stat(resource, children)
 	if err != nil {
 		if storage.IsNotExistError(err) {
-			logrus.Error(err)
+			go logrus.Error(err)
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
-		logrus.Error(err)
+		go logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	metaJSON, err := json.Marshal(meta)
 	if err != nil {
-		logrus.Error(err)
+		go logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

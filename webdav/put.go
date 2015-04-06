@@ -1,6 +1,7 @@
 package webdav
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
@@ -9,7 +10,7 @@ import (
 
 func (api *API) put(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
-	_, err := api.basicAuth(r)
+	authRes, err := api.basicAuth(r)
 	if err != nil {
 		logrus.Error(err)
 		w.Header().Set("WWW-Authenticate", "Basic Real='WhiteDAV credentials'")
@@ -20,7 +21,7 @@ func (api *API) put(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	if resource == "" {
 		resource = "/"
 	}
-
+	logrus.Info(fmt.Sprintf("api:webdav user:%s op:put path:%s", authRes.Username, resource))
 	/*
 	   Content-Range is dangerous for PUT requests:  PUT per definition
 	   stores a full resource.  draft-ietf-httpbis-p2-semantics-15 says

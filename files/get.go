@@ -1,6 +1,7 @@
 package files
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
@@ -10,7 +11,7 @@ import (
 )
 
 func (api *API) get(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	_, err := api.tokenAuth(r, false)
+	authRes, err := api.tokenAuth(r, false)
 	if err != nil {
 		logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -20,6 +21,7 @@ func (api *API) get(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	if resource == "" {
 		resource = "/"
 	}
+	logrus.Info(fmt.Sprintf("api:files user:%s op:get path:%s", authRes.Username, resource))
 	meta, err := api.storageProvider.Stat(resource, false)
 	if err != nil {
 		if storage.IsNotExistError(err) {

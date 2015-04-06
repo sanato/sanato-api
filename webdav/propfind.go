@@ -12,7 +12,7 @@ import (
 
 func (api *API) propfind(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
-	_, err := api.basicAuth(r)
+	authRes, err := api.basicAuth(r)
 	if err != nil {
 		logrus.Error(err)
 		w.Header().Set("WWW-Authenticate", "Basic Real='WhiteDAV credentials'")
@@ -23,7 +23,7 @@ func (api *API) propfind(w http.ResponseWriter, r *http.Request, p httprouter.Pa
 	if resource == "" {
 		resource = "/"
 	}
-
+	logrus.Info(fmt.Sprintf("api:webdav user:%s op:propfind path:%s", authRes.Username, resource))
 	var children bool
 	depth := r.Header.Get("Depth")
 	if depth == "1" {

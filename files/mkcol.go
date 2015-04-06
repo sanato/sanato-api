@@ -2,6 +2,7 @@ package files
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
@@ -10,7 +11,7 @@ import (
 )
 
 func (api *API) mkcol(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	_, err := api.tokenAuth(r, true)
+	authRes, err := api.tokenAuth(r, true)
 	if err != nil {
 		logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -20,6 +21,7 @@ func (api *API) mkcol(w http.ResponseWriter, r *http.Request, p httprouter.Param
 	if resource == "" {
 		resource = "/"
 	}
+	logrus.Info(fmt.Sprintf("api:files user:%s op:mkcol path:%s", authRes.Username, resource))
 	err = api.storageProvider.CreateCol(resource, false)
 	if err != nil {
 		if storage.IsNotExistError(err) {
@@ -53,6 +55,6 @@ func (api *API) mkcol(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	w.Write(metaJSON)
 	w.WriteHeader(http.StatusCreated)
+	w.Write(metaJSON)
 }

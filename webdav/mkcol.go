@@ -2,6 +2,7 @@ package webdav
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
@@ -10,7 +11,7 @@ import (
 
 func (api *API) mkcol(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
-	_, err := api.basicAuth(r)
+	authRes, err := api.basicAuth(r)
 	if err != nil {
 		logrus.Error(err)
 		w.Header().Set("WWW-Authenticate", "Basic Real='WhiteDAV credentials'")
@@ -21,7 +22,7 @@ func (api *API) mkcol(w http.ResponseWriter, r *http.Request, p httprouter.Param
 	if resource == "" {
 		resource = "/"
 	}
-
+	logrus.Info(fmt.Sprintf("api:webdav user:%s op:mkcol path:%s", authRes.Username, resource))
 	if r.ContentLength > 0 { // MKCOL with weird body must fail with 415 (RFC2518:8.3.1)
 		// we dont accept mkcol with body, this is against the estandar
 		logrus.Error(errors.New("we do not accept MKCOL with body"))

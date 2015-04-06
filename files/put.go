@@ -2,6 +2,7 @@ package files
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
@@ -10,7 +11,7 @@ import (
 )
 
 func (api *API) put(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	_, err := api.tokenAuth(r, true)
+	authRes, err := api.tokenAuth(r, true)
 	if err != nil {
 		logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -20,6 +21,7 @@ func (api *API) put(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	if resource == "" {
 		resource = "/"
 	}
+	logrus.Info(fmt.Sprintf("api:files user:%s op:put path:%s", authRes.Username, resource))
 	if r.Header.Get("Content-Range") != "" {
 		logrus.Error("PUT with Content-Range is not allowed.")
 		http.Error(w, http.StatusText(http.StatusNotImplemented), http.StatusNotImplemented)

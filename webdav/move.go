@@ -1,6 +1,7 @@
 package webdav
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sanato/sanato-lib/storage"
@@ -12,7 +13,7 @@ import (
 
 func (api *API) move(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
-	_, err := api.basicAuth(r)
+	authRes, err := api.basicAuth(r)
 	if err != nil {
 		logrus.Error(err)
 		w.Header().Set("WWW-Authenticate", "Basic Real='WhiteDAV credentials'")
@@ -42,6 +43,7 @@ func (api *API) move(w http.ResponseWriter, r *http.Request, p httprouter.Params
 		resource = "/"
 	}
 
+	logrus.Info(fmt.Sprintf("api:webdav user:%s op:move path:%s", authRes.Username, resource, destination))
 	overwrite = strings.ToUpper(overwrite)
 	if overwrite == "" {
 		overwrite = "T"

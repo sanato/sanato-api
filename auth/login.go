@@ -13,14 +13,14 @@ import (
 func (api *API) login(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	config, err := api.configProvider.Parse()
 	if err != nil {
-		logrus.Error(err)
+		go logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		logrus.Error(err)
+		go logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -36,9 +36,10 @@ func (api *API) login(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
+	go logrus.Info("api:auth user:" + params.Username)
 	authRes, err := api.authProvider.Authenticate(params.Username, params.Password)
 	if err != nil {
-		logrus.Error(err)
+		go logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
@@ -50,7 +51,7 @@ func (api *API) login(w http.ResponseWriter, r *http.Request, p httprouter.Param
 	token.Claims["email"] = authRes.Email
 	tokenString, err := token.SignedString([]byte(config.TokenSecret))
 	if err != nil {
-		logrus.Error(err)
+		go logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -58,7 +59,7 @@ func (api *API) login(w http.ResponseWriter, r *http.Request, p httprouter.Param
 	data["token"] = tokenString
 	tokenJSON, err := json.Marshal(data)
 	if err != nil {
-		logrus.Error(err)
+		go logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

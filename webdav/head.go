@@ -10,7 +10,7 @@ import (
 
 func (api *API) head(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
-	_, err := api.basicAuth(r)
+	authRes, err := api.basicAuth(r)
 	if err != nil {
 		logrus.Error(err)
 		w.Header().Set("WWW-Authenticate", "Basic Real='WhiteDAV credentials'")
@@ -21,7 +21,7 @@ func (api *API) head(w http.ResponseWriter, r *http.Request, p httprouter.Params
 	if resource == "" {
 		resource = "/"
 	}
-
+	go logrus.Info(fmt.Sprintf("api:webdav user:%s op:head path:%s", authRes.Username, resource))
 	meta, err := api.storageProvider.Stat(resource, false)
 	if err != nil {
 		if storage.IsNotExistError(err) {
